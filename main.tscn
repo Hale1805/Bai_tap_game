@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://d6fuc58d0yjn"]
+
+[ext_resource type="PackedScene" uid="uid://bqcw1rwv6p2ls" path="res://object_a.tscn" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://4inhi343wv0s" path="res://Scripts/main.gd" id="1_lquwl"]
+[ext_resource type="PackedScene" uid="uid://bj3nhsr6iu80x" path="res://object_b.tscn" id="2_h2yge"]
+[ext_resource type="Texture2D" uid="uid://tftn0spsrwsj" path="res://assets/background7.png" id="4_7mycd"]
+[ext_resource type="Texture2D" uid="uid://6a8a3q685wc2" path="res://assets/background8.png" id="5_272bh"]
+
+[node name="Main" type="Node2D" unique_id=757137837]
+script = ExtResource("1_lquwl")
+
+[node name="Object_A" parent="." unique_id=619386572 instance=ExtResource("1_0xm2m")]
+
+[node name="Object_B" parent="." unique_id=1493178911 instance=ExtResource("2_h2yge")]
+
+[node name="Layer1" type="Parallax2D" parent="." unique_id=257527156]
+z_index = -100
+repeat_size = Vector2(2304, 0)
+autoscroll = Vector2(-100, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="Layer1" unique_id=671971483]
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("4_7mycd")
+centered = false
+
+[node name="Sprite2D2" type="Sprite2D" parent="Layer1" unique_id=1017227463]
+position = Vector2(1152, 0)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("4_7mycd")
+centered = false
+flip_h = true
+
+[node name="Layer2" type="Parallax2D" parent="." unique_id=1872668391]
+z_index = -100
+repeat_size = Vector2(2304, 0)
+autoscroll = Vector2(-100, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="Layer2" unique_id=1426407908]
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("5_272bh")
+centered = false
+
+[node name="Sprite2D2" type="Sprite2D" parent="Layer2" unique_id=845036005]
+position = Vector2(1152, 0)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("5_272bh")
+centered = false
+flip_h = true
+
+[node name="Timer" type="Timer" parent="." unique_id=1489498121]
+wait_time = 30.0
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

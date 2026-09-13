@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://mh86ammxwpsd"]
+
+[ext_resource type="Script" uid="uid://bckn7bf3kr01d" path="res://Scripts/oblect_c.gd" id="1_adb3u"]
+[ext_resource type="Texture2D" uid="uid://dj1p4mnrjn2c7" path="res://assets/Missile_3_Flying_007.png" id="2_adb3u"]
+[ext_resource type="PackedScene" uid="uid://c0vq76e3ara6g" path="res://explosion.tscn" id="2_svt17"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ahbr1"]
+size = Vector2(60, 20)
+
+[node name="missle_3_type" type="Area2D" unique_id=1143426753]
+scale = Vector2(0.6, 0.6)
+script = ExtResource("1_adb3u")
+explosion_scene = ExtResource("2_svt17")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1990805507]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_adb3u")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1428074124]
+position = Vector2(14, 0)
+shape = SubResource("RectangleShape2D_ahbr1")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1068491193]
+rect = Rect2(-16, -10, 61, 20)
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://bj3nhsr6iu80x"]
+
+[ext_resource type="Script" uid="uid://dnmyiw8t5bfx2" path="res://Scripts/object_b.gd" id="1_iaqh1"]
+[ext_resource type="Texture2D" uid="uid://dcmbcimquf1vn" path="res://assets/obj_B.png" id="2_71qey"]
+
+[node name="Object_B" type="Area2D" unique_id=2016377426 groups=["enemy"]]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_iaqh1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1845464503 groups=["enemy"]]
+texture = ExtResource("2_71qey")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=273434250 groups=["enemy"]]
+position = Vector2(-8, 4)
+polygon = PackedVector2Array(80, -105, 100, -85, 100, 73, 79, 94, -78, 95, -100, 73, -99, -84, -78, -105, 80, -105, 100, -85)
+
+[node name="Timer" type="Timer" parent="." unique_id=1566497466]
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
