@@ -1,44 +1,38 @@
 extends Area2D
 
-@export var speed: float = 250.0
-var direction: Vector2
+@export var speed := 250.0
+@export var max_health := 60.0
+var direction := Vector2.ZERO
+var health := 0.0
+var frozen_remaining := 0.0
 
-func _ready():
-	var screen_size = get_viewport_rect().size
-	# Vị trí xuất hiện: Chính giữa biên phải, đối diện A
-	position = Vector2(screen_size.x - 70, screen_size.y / 2)
+func _ready() -> void:
+	health = max_health
+	position = Vector2(get_viewport_rect().size.x - 70, get_viewport_rect().size.y / 2)
 	randomize_direction()
 
-func _process(delta):
-	position += direction.normalized() * speed * delta
-	var screen_size = get_viewport_rect().size
-
-	# Chạm biên trái -> xuất hiện ngẫu nhiên biên phải
-	if position.x < -20:
-		position.x = screen_size.x + 20
+func _process(delta: float) -> void:
+	if frozen_remaining > 0.0:
+		frozen_remaining = maxf(frozen_remaining - delta, 0.0)
+		return
+	position += direction * speed * delta
+	var screen_size := get_viewport_rect().size
+	if position.x < -20 or position.x > screen_size.x + 20:
+		position.x = screen_size.x + 20 if position.x < -20 else -20
 		position.y = randf_range(screen_size.y / 4, screen_size.y - 30)
-	# Chạm biên phải -> xuất hiện ngẫu nhiên bên trái
-	elif position.x > screen_size.x + 20:
-		position.x = -20
-		position.y = randf_range(screen_size.y / 4, screen_size.y - 30)
-		
-	# Chạm biên trên -> xuất hiện ngẫu nhiên biên dưới
-	if position.y < -20:
-		position.y = screen_size.y + 20
-		position.x = randf_range(screen_size.x / 4, screen_size.x - 30)
-		
-	# Chạm biên dưới -> xuất hiện ngẫu nhiên biên trên
-	elif position.y > screen_size.y + 20:
-		position.y = -20
+	if position.y < -20 or position.y > screen_size.y + 20:
+		position.y = screen_size.y + 20 if position.y < -20 else -20
 		position.x = randf_range(screen_size.x / 4, screen_size.x - 30)
 
-
-func _on_timer_timeout() -> void:
-	randomize_direction()
-	
-func randomize_direction():
-	#Luôn tiến về bên trái (x âm), trục y ngẫu nhiên đổi hướng
+func _on_timer_timeout() -> void: randomize_direction()
+func randomize_direction() -> void:
 	direction = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized()
-	#Phòng trường hợp cả x và y random ra đúng số 0, 0
-	if direction == Vector2.ZERO:
-		direction = Vector2.RIGHT #Gán tạm một hướng để tàu tiếp tục di chuyển
+	if direction == Vector2.ZERO: direction = Vector2.LEFT
+func take_damage(amount: float) -> bool:
+	health -= maxf(amount, 0.0)
+	if health <= 0.0:
+		AudioManager.play_sfx(&"explosion")
+		queue_free()
+		return true
+	return false
+func freeze(duration: float) -> void: frozen_remaining = maxf(frozen_remaining, duration)
