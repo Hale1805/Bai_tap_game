@@ -10,6 +10,8 @@ size = Vector2(60, 20)
 [node name="missle_1_type" type="Area2D" unique_id=1143426753]
 scale = Vector2(0.6, 0.6)
 script = ExtResource("1_kd3bj")
+speed = 390.0
+damage = 45.0
 explosion_scene = ExtResource("2_ikfyl")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1990805507]

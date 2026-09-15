@@ -5,6 +5,13 @@
 [ext_resource type="PackedScene" uid="uid://bj3nhsr6iu80x" path="res://object_b.tscn" id="2_h2yge"]
 [ext_resource type="Texture2D" uid="uid://tftn0spsrwsj" path="res://assets/background7.png" id="4_7mycd"]
 [ext_resource type="Texture2D" uid="uid://6a8a3q685wc2" path="res://assets/background8.png" id="5_272bh"]
+[ext_resource type="PackedScene" path="res://hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://pickups/x_gold.tscn" id="7_x"]
+[ext_resource type="PackedScene" path="res://pickups/y_armor.tscn" id="8_y"]
+[ext_resource type="PackedScene" path="res://pickups/z_trap.tscn" id="9_z"]
+
+[sub_resource type="RectangleShape2D" id="DangerShape"]
+size = Vector2(260, 720)
 
 [node name="Main" type="Node2D" unique_id=757137837]
 script = ExtResource("1_lquwl")
@@ -12,6 +19,23 @@ script = ExtResource("1_lquwl")
 [node name="Object_A" parent="." unique_id=619386572 instance=ExtResource("1_0xm2m")]
 
 [node name="Object_B" parent="." unique_id=1493178911 instance=ExtResource("2_h2yge")]
+
+[node name="XGold" parent="." unique_id=1096577079 instance=ExtResource("7_x")]
+position = Vector2(360, 300)
+
+[node name="YArmor" parent="." unique_id=1518387730 instance=ExtResource("8_y")]
+position = Vector2(540, 520)
+
+[node name="ZTrap" parent="." unique_id=912641190 instance=ExtResource("9_z")]
+position = Vector2(720, 250)
+
+[node name="DangerZone" type="Area2D" parent="." unique_id=525622869]
+position = Vector2(130, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DangerZone" unique_id=936435754]
+shape = SubResource("DangerShape")
+
+[node name="HUD" parent="." unique_id=2016458871 instance=ExtResource("6_hud")]
 
 [node name="Layer1" type="Parallax2D" parent="." unique_id=257527156]
 z_index = -100
@@ -36,6 +60,7 @@ repeat_size = Vector2(2304, 0)
 autoscroll = Vector2(-100, 0)
 
 [node name="Sprite2D" type="Sprite2D" parent="Layer2" unique_id=1426407908]
+position = Vector2(2, 4)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("5_272bh")
 centered = false
@@ -51,4 +76,5 @@ flip_h = true
 wait_time = 30.0
 autostart = true
 
+[connection signal="area_entered" from="DangerZone" to="." method="_on_danger_zone_area_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -6,11 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://dl53yvvwavfd3" path="res://bullet_scene/missle_type1.tscn" id="3_csn38"]
 [ext_resource type="PackedScene" uid="uid://coualbxln02ux" path="res://bullet_scene/missle_type2.tscn" id="4_hotym"]
 [ext_resource type="PackedScene" uid="uid://mh86ammxwpsd" path="res://bullet_scene/missle_type3.tscn" id="5_n4uql"]
+[ext_resource type="PackedScene" path="res://bullet_scene/bomb.tscn" id="6_bomb"]
 
-[node name="Object_A" type="Area2D" unique_id=341510733]
+[node name="Object_A" type="Area2D" unique_id=341510733 groups=["player"]]
 scale = Vector2(0.5, 0.5)
 script = ExtResource("1_v5ufo")
-bullet_scenes = Array[PackedScene]([ExtResource("2_vygj4"), ExtResource("3_csn38"), ExtResource("4_hotym"), ExtResource("5_n4uql")])
+bullet_scenes = Array[PackedScene]([ExtResource("2_vygj4"), ExtResource("3_csn38"), ExtResource("6_bomb")])
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1411633175]
 texture = ExtResource("2_v5ufo")
@@ -18,3 +19,5 @@ texture = ExtResource("2_v5ufo")
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1298598851]
 position = Vector2(6, 6)
 polygon = PackedVector2Array(-77, -107, 78, -106, 100, -84, 100, 73, 78, 94, -78, 95, -100, 72, -100, -84, -79, -105)
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

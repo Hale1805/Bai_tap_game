@@ -1,47 +1,91 @@
 extends Area2D
 
-@export var speed: float = 350.0
+@export var speed := 350.0
 @export var bullet_scenes: Array[PackedScene]
-# Biến để ghi nhớ đang chọn loại đạn số mấy (bắt đầu từ 0)
-var current_bullet_index: int = 0
-var last_direction: Vector2 = Vector2.RIGHT #Biến ghi nhớ hướng của mũi phi thuyền, mặc định là hướng sang phải
+var current_bullet_index := 0
+var last_direction := Vector2.RIGHT
+var speed_multiplier := 1.0
+var attack_cooldowns := [0.0, 0.0, 0.0]
+var shield_cooldown := 0.0
+var shield_remaining := 0.0
+var freeze_cooldown := 0.0
+var contact_cooldown := 0.0
+const ATTACK_COOLDOWNS := [0.25, 0.8, 1.4]
 
-func _ready():
-	# Lấy kích thước màn hình game
-	var screen_size = get_viewport_rect().size
-	# Vị trí xuất hiện: Chính giữa biên trái (x = 50 để không bị lẹm hình, y = một nửa chiều cao)
-	position = Vector2(50, screen_size.y / 2)
+func _ready() -> void:
+	position = Vector2(50, get_viewport_rect().size.y / 2)
 	rotation = last_direction.angle()
+	GameState.reset()
 
-func _process(delta):
-	# Logic di chuyển linh hoạt (Dùng phím mũi tên hoặc WASD để test trên PC)
-	var velocity = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	
-	if velocity.length() > 0:
-		position += velocity * speed * delta
-		last_direction = velocity #Ghi nhớ hướng vừa đi
-		rotation = velocity.angle() #Xoay thân tàu
+func _process(delta: float) -> void:
+	if GameState.is_game_over:
+		return
+	var velocity := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if velocity != Vector2.ZERO:
+		position += velocity * speed * speed_multiplier * delta
+		last_direction = velocity.normalized()
+		rotation = last_direction.angle()
+	position.x = clampf(position.x, 50.0, get_viewport_rect().size.x - 50.0)
+	position.y = clampf(position.y, 50.0, get_viewport_rect().size.y - 50.0)
+	for index in attack_cooldowns.size(): attack_cooldowns[index] = maxf(attack_cooldowns[index] - delta, 0.0)
+	shield_cooldown = maxf(shield_cooldown - delta, 0.0)
+	freeze_cooldown = maxf(freeze_cooldown - delta, 0.0)
+	contact_cooldown = maxf(contact_cooldown - delta, 0.0)
+	if shield_remaining > 0.0:
+		shield_remaining -= delta
+		if shield_remaining <= 0.0: GameState.set_shield(false)
+	if Input.is_action_just_pressed("attack_bullet"): try_attack(GameState.AttackType.BULLET)
+	if Input.is_action_just_pressed("attack_missile"): try_attack(GameState.AttackType.MISSILE)
+	if Input.is_action_just_pressed("attack_bomb"): try_attack(GameState.AttackType.BOMB)
+	if Input.is_action_just_pressed("activate_shield"): activate_shield()
+	if Input.is_action_just_pressed("activate_freeze"): activate_freeze()
 
-func _input(event):
-	# Bắt sự kiện chạm màn hình 
-	if event is InputEventScreenTouch and event.pressed:
-		shoot()
-	# Thêm nút để đổi loại đạn (Ví dụ: Nhấn phím Space)
-	if event.is_action_pressed("ui_accept"):
-		switch_weapon()
+func _unhandled_input(event: InputEvent) -> void:
+	if GameState.is_game_over:
+		return
+	if event is InputEventScreenTouch and event.pressed: try_attack(GameState.selected_attack)
+	if event.is_action_pressed("ui_accept"): switch_weapon()
 
-# Hàm xử lý đổi đạn
-func switch_weapon():
-	# Kiểm tra xem bạn có bỏ đạn vào mảng chưa
-	if bullet_scenes.size() > 0:
-		# Tăng index lên 1. Nếu vượt quá số lượng đạn thì quay vòng về 0
-		current_bullet_index = (current_bullet_index + 1) % bullet_scenes.size()
-		print("Đang dùng đạn số: ", current_bullet_index)
-		
-func shoot():
-	# Lấy ra loại đạn hiện tại đang được chọn
-	if bullet_scenes.size() > 0 and bullet_scenes[current_bullet_index] != null:
-		var bullet = bullet_scenes[current_bullet_index].instantiate()  #Khởi tạo ra object C
-		bullet.position = position  #Truyền vị trí
-		bullet.direction = last_direction  #Truyền hướng
-		get_parent().add_child(bullet)     #Đưa obj C ra màn hình
+func switch_weapon() -> void:
+	if bullet_scenes.size() >= 3:
+		current_bullet_index = (current_bullet_index + 1) % 3
+		GameState.select_attack(current_bullet_index as GameState.AttackType)
+
+func try_attack(attack_type: GameState.AttackType) -> bool:
+	var index := int(attack_type)
+	if index >= bullet_scenes.size() or attack_cooldowns[index] > 0.0 or bullet_scenes[index] == null: return false
+	var projectile = bullet_scenes[index].instantiate()
+	projectile.global_position = global_position + last_direction * 55.0
+	projectile.direction = last_direction
+	get_parent().add_child(projectile)
+	attack_cooldowns[index] = ATTACK_COOLDOWNS[index]
+	GameState.select_attack(attack_type)
+	AudioManager.play_sfx(&"shoot")
+	return true
+
+func activate_shield() -> bool:
+	if shield_cooldown > 0.0: return false
+	shield_cooldown = 8.0
+	shield_remaining = 3.0
+	GameState.set_shield(true)
+	GameState.apply_buff("SHIELD", shield_remaining)
+	AudioManager.play_sfx(&"shield")
+	return true
+
+func activate_freeze() -> bool:
+	if freeze_cooldown > 0.0: return false
+	freeze_cooldown = 9.0
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy.has_method("freeze"): enemy.freeze(2.5)
+	AudioManager.play_sfx(&"freeze")
+	return true
+
+func apply_speed_modifier(multiplier: float, duration: float) -> void:
+	speed_multiplier = multiplier
+	get_tree().create_timer(duration).timeout.connect(func(): speed_multiplier = 1.0)
+
+func _on_area_entered(area: Area2D) -> void:
+	if area.is_in_group("enemy") and contact_cooldown <= 0.0:
+		GameState.apply_damage(15.0)
+		contact_cooldown = 0.8
+		AudioManager.play_sfx(&"hit")
