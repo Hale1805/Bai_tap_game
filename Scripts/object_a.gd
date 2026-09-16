@@ -60,6 +60,7 @@ func try_attack(attack_type: GameState.AttackType) -> bool:
 	get_parent().add_child(projectile)
 	attack_cooldowns[index] = ATTACK_COOLDOWNS[index]
 	GameState.select_attack(attack_type)
+	current_bullet_index = index #add thêm chỗ này
 	AudioManager.play_sfx(&"shoot")
 	return true
 

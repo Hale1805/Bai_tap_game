@@ -74,25 +74,25 @@ func select_attack(attack: AttackType) -> void:
 	selected_attack = attack
 	state_changed.emit()
 
-func apply_debuff(name: String, duration: float) -> void:
-	debuffs[name] = maxf(debuffs.get(name, 0.0), duration)
+func apply_debuff(effect_name: String, duration: float) -> void:
+	debuffs[effect_name] = maxf(debuffs.get(effect_name, 0.0), duration)
 	state_changed.emit()
 
-func apply_buff(name: String, duration: float) -> void:
-	buffs[name] = maxf(buffs.get(name, 0.0), duration)
+func apply_buff(effect_name: String, duration: float) -> void:
+	buffs[effect_name] = maxf(buffs.get(effect_name, 0.0), duration)
 	state_changed.emit()
 
 func _process(delta: float) -> void:
 	var changed := false
-	for name in debuffs.keys():
-		debuffs[name] = maxf(debuffs[name] - delta, 0.0)
-		if debuffs[name] <= 0.0:
-			debuffs.erase(name)
+	for effect_name in debuffs.keys():
+		debuffs[effect_name] = maxf(debuffs[effect_name] - delta, 0.0)
+		if debuffs[effect_name] <= 0.0:
+			debuffs.erase(effect_name)
 		changed = true
-	for name in buffs.keys():
-		buffs[name] = maxf(buffs[name] - delta, 0.0)
-		if buffs[name] <= 0.0:
-			buffs.erase(name)
+	for effect_name in buffs.keys():
+		buffs[effect_name] = maxf(buffs[effect_name] - delta, 0.0)
+		if buffs[effect_name] <= 0.0:
+			buffs.erase(effect_name)
 		changed = true
 	if changed:
 		state_changed.emit()

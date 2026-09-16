@@ -17,11 +17,11 @@ func _process(delta: float) -> void:
 		return
 	position += direction * speed * delta
 	var screen_size := get_viewport_rect().size
-	if position.x < -20 or position.x > screen_size.x + 20:
-		position.x = screen_size.x + 20 if position.x < -20 else -20
+	if position.x < -20.0 or position.x > screen_size.x + 20.0:
+		position.x = screen_size.x + 20.0 if position.x < -20.0 else -20.0
 		position.y = randf_range(screen_size.y / 4, screen_size.y - 30)
-	if position.y < -20 or position.y > screen_size.y + 20:
-		position.y = screen_size.y + 20 if position.y < -20 else -20
+	if position.y < -20.0 or position.y > screen_size.y + 20.0:
+		position.y = screen_size.y + 20.0 if position.y < -20.0 else -20.0
 		position.x = randf_range(screen_size.x / 4, screen_size.x - 30)
 
 func _on_timer_timeout() -> void: randomize_direction()

@@ -1,25 +1,26 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bnlqytr61mlul"]
 
-[ext_resource type="Script" path="res://Scripts/oblect_c.gd" id="1"]
-[ext_resource type="PackedScene" path="res://explosion.tscn" id="2"]
+[ext_resource type="Script" uid="uid://bckn7bf3kr01d" path="res://Scripts/oblect_c.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://c0vq76e3ara6g" path="res://explosion.tscn" id="2"]
+
 [sub_resource type="CircleShape2D" id="1"]
 radius = 22.0
 
-[node name="Bomb" type="Area2D"]
+[node name="Bomb" type="Area2D" unique_id=1984397078]
 script = ExtResource("1")
 speed = 330.0
 damage = 45.0
 blast_radius = 150.0
 explosion_scene = ExtResource("2")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(-18, 0, -9, -15, 9, -15, 18, 0, 9, 15, -9, 15)
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=853366544]
 color = Color(1, 0.35, 0.1, 1)
+polygon = PackedVector2Array(-18, 0, -9, -15, 9, -15, 18, 0, 9, 15, -9, 15)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1624952733]
 shape = SubResource("1")
 
-[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1679231386]
 rect = Rect2(-25, -25, 50, 50)
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

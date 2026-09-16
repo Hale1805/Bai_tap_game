@@ -49,6 +49,7 @@ func _add_action_button(text: String, position_value: Vector2, action: Callable)
 	button.text = text
 	button.position = position_value
 	button.size = Vector2(105, 38)
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(action)
 	add_child(button)
 	return button
@@ -68,15 +69,15 @@ func refresh() -> void:
 		debuff_label.text = ""
 	else:
 		var active := []
-		for name in GameState.debuffs:
-			active.append("%s %.1fs" % [name, GameState.debuffs[name]])
+		for effect_name in GameState.debuffs:
+			active.append("%s %.1fs" % [name, GameState.debuffs[effect_name]])
 		debuff_label.text = "DEBUFF: " + " | ".join(active)
 	if GameState.buffs.is_empty():
 		buff_label.text = ""
 	else:
 		var active_buffs := []
-		for name in GameState.buffs:
-			active_buffs.append("%s %.1fs" % [name, GameState.buffs[name]])
+		for effect_name in GameState.buffs:
+			active_buffs.append("%s %.1fs" % [effect_name, GameState.buffs[effect_name]])
 		buff_label.text = "BUFF: " + " | ".join(active_buffs)
 
 func _create_end_overlay() -> void:

@@ -6,12 +6,12 @@
 [ext_resource type="Texture2D" uid="uid://tftn0spsrwsj" path="res://assets/background7.png" id="4_7mycd"]
 [ext_resource type="Texture2D" uid="uid://6a8a3q685wc2" path="res://assets/background8.png" id="5_272bh"]
 [ext_resource type="PackedScene" path="res://hud.tscn" id="6_hud"]
-[ext_resource type="PackedScene" path="res://pickups/x_gold.tscn" id="7_x"]
+[ext_resource type="PackedScene" uid="uid://c4svvtnfe1ari" path="res://pickups/x_gold.tscn" id="7_x"]
 [ext_resource type="PackedScene" path="res://pickups/y_armor.tscn" id="8_y"]
 [ext_resource type="PackedScene" path="res://pickups/z_trap.tscn" id="9_z"]
 
 [sub_resource type="RectangleShape2D" id="DangerShape"]
-size = Vector2(260, 720)
+size = Vector2(300, 648)
 
 [node name="Main" type="Node2D" unique_id=757137837]
 script = ExtResource("1_lquwl")
@@ -33,6 +33,7 @@ position = Vector2(720, 250)
 position = Vector2(130, 360)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DangerZone" unique_id=936435754]
+position = Vector2(19, -36)
 shape = SubResource("DangerShape")
 
 [node name="HUD" parent="." unique_id=2016458871 instance=ExtResource("6_hud")]
@@ -46,6 +47,7 @@ autoscroll = Vector2(-100, 0)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("4_7mycd")
 centered = false
+metadata/_edit_lock_ = true
 
 [node name="Sprite2D2" type="Sprite2D" parent="Layer1" unique_id=1017227463]
 position = Vector2(1152, 0)
@@ -64,6 +66,7 @@ position = Vector2(2, 4)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("5_272bh")
 centered = false
+metadata/_edit_lock_ = true
 
 [node name="Sprite2D2" type="Sprite2D" parent="Layer2" unique_id=845036005]
 position = Vector2(1152, 0)

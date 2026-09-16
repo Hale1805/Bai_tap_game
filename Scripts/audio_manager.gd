@@ -74,7 +74,7 @@ func _fill_sfx() -> void:
 				sample = sin(sfx_phase) * 0.22
 				sfx_phase += TAU * sfx_frequency / 22050.0
 		sfx_playback.push_frame(Vector2(sample, sample))
-func _fill_music(delta: float) -> void:
+func _fill_music(_delta: float) -> void:
 	if music_playback == null: return
 	for frame in music_playback.get_frames_available():
 		var drone_frequency := 48.0 + sin(music_time * 0.10) * 4.0
