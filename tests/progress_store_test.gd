@@ -29,6 +29,12 @@ func _init() -> void:
 	store.complete_level(1, 20, 0)
 	var lower_score: Dictionary = store.load_progress()
 	_expect(lower_score.best_scores.get("1", 0) == 50, "lower score must not replace the best score")
+	_expect(store.has_method("save_checkpoint"), "ProgressStore must expose checkpoint saving for Pause")
+	if store.has_method("save_checkpoint"):
+		store.save_checkpoint(1, 120, 7, 3.0, 0.0)
+		var checkpoint_progress: Dictionary = store.load_progress()
+		_expect(checkpoint_progress.checkpoint.get("level_id", 0) == 1, "pause checkpoint must retain level id")
+		_expect(checkpoint_progress.checkpoint.get("score", 0) == 120, "pause checkpoint must retain score")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SAVE_PATH))
 	_finish()
 

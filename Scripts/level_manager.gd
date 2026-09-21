@@ -4,11 +4,12 @@ signal level_started(level_id: int)
 signal objective_changed(current: float, target: float)
 signal level_won(level_id: int)
 signal level_lost(level_id: int)
+signal game_completed
 
 const LEVELS := {
 	1: {"id": 1, "title": "Moon Patrol", "objective_kind": &"defeat", "target": 5.0, "background_mode": 0, "max_active_npcs": 4, "allowed_npcs": [&"hunter"]},
 	2: {"id": 2, "title": "Meteor Storm", "objective_kind": &"survive", "target": 45.0, "defeat_target": 8.0, "background_mode": 1, "max_active_npcs": 7, "allowed_npcs": [&"hunter", &"scout"]},
-	3: {"id": 3, "title": "Alien Core", "objective_kind": &"core", "target": 1.0, "background_mode": 2, "max_active_npcs": 8, "allowed_npcs": [&"hunter", &"scout", &"guardian"]},
+	3: {"id": 3, "title": "Alien Core", "objective_kind": &"core", "target": 1.0, "background_mode": 2, "max_active_npcs": 4, "escort_count": 3, "allowed_npcs": [&"hunter", &"scout", &"guardian"]},
 }
 
 var progress_store: Node
@@ -81,6 +82,21 @@ func end_game_over() -> void:
 func stop_gameplay() -> void:
 	gameplay_active = false
 
+func complete_current_level_for_demo() -> void:
+	if not gameplay_active or terminal_emitted:
+		return
+	var definition: Dictionary = LEVELS.get(current_level_id, {})
+	if definition.is_empty():
+		return
+	objective_progress = float(definition.get("defeat_target", definition.target))
+	survival_progress = float(definition.target) if current_level_id == 2 else survival_progress
+	objective_changed.emit(objective_progress, float(definition.target))
+	if current_level_id == 3:
+		var audio := get_node_or_null("/root/AudioManager")
+		if audio != null:
+			audio.play_sfx(&"boss_explosion")
+	_win_level()
+
 func get_current_definition() -> Dictionary:
 	return LEVELS.get(current_level_id, {}).duplicate(true)
 
@@ -92,4 +108,8 @@ func _win_level() -> void:
 	var score := int(game_state.score) if game_state != null else 0
 	var gold := int(game_state.gold) if game_state != null else 0
 	progress_store.complete_level(current_level_id, score, gold)
-	level_won.emit(current_level_id)
+	if current_level_id == 3:
+		progress_store.reset_progress()
+		game_completed.emit()
+	else:
+		level_won.emit(current_level_id)

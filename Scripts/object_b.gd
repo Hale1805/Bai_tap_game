@@ -12,6 +12,9 @@ func _ready() -> void:
 	randomize_direction()
 
 func _process(delta: float) -> void:
+	var manager := get_node_or_null("/root/LevelManager") if is_inside_tree() else null
+	if manager != null and not manager.gameplay_active:
+		return
 	if frozen_remaining > 0.0:
 		frozen_remaining = maxf(frozen_remaining - delta, 0.0)
 		return

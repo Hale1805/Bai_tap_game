@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var speed := 180.0
+@export var speed := 260.0
 @export var preferred_range := 300.0
 @export var max_health := 45.0
 var health := max_health
@@ -16,6 +16,9 @@ func _ready() -> void:
 		target = get_tree().get_first_node_in_group("player") as Node2D
 
 func _process(delta: float) -> void:
+	var manager := get_node_or_null("/root/LevelManager") if is_inside_tree() else null
+	if manager != null and not manager.gameplay_active:
+		return
 	if frozen_remaining > 0.0:
 		frozen_remaining = maxf(frozen_remaining - delta, 0.0)
 		return

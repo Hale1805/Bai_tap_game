@@ -16,11 +16,16 @@ var crossfade_time: float = 3.0 # Thời gian chuyển cảnh (3 giây)
 func _ready():
 	LevelManager.level_won.connect(_on_level_won)
 	LevelManager.level_lost.connect(_on_level_lost)
+	LevelManager.game_completed.connect(_on_game_completed)
 	GameState.game_over.connect(LevelManager.end_game_over)
 	_configure_level(LevelManager.get_current_definition())
 	# Đảm bảo ảnh 2 hoàn toàn trong suốt lúc game mới bắt đầu
 	layer2.modulate.a = 0.0
-	_watch_enemy($Object_B)
+	if LevelManager.current_level_id == 3:
+		$Object_B.queue_free()
+		_spawn_boss_encounter()
+	else:
+		_watch_enemy($Object_B)
 
 # Hàm này kích hoạt mỗi 30 giây
 func _on_timer_timeout():
@@ -80,8 +85,27 @@ func _on_level_won(level_id: int) -> void:
 func _on_level_lost(level_id: int) -> void:
 	$EndScreen.show_loss(level_id)
 
+func _on_game_completed() -> void:
+	$EndScreen.show_game_complete()
+
 func _choose_enemy_scene() -> PackedScene:
 	var definition := LevelManager.get_current_definition()
 	var allowed: Array = definition.get("allowed_npcs", [&"hunter"])
 	var npc_type: StringName = allowed.pick_random()
 	return NPC_SCENES.get(npc_type, ENEMY_SCENE)
+
+func _spawn_boss_encounter() -> void:
+	_spawn_npc(&"guardian", Vector2(860, 330), false)
+	_spawn_npc(&"hunter", Vector2(960, 180), false)
+	_spawn_npc(&"scout", Vector2(1010, 330), false)
+	_spawn_npc(&"hunter", Vector2(960, 500), false)
+
+func _spawn_npc(npc_type: StringName, spawn_position: Vector2, respawn_on_defeat: bool) -> void:
+	var scene: PackedScene = NPC_SCENES.get(npc_type, ENEMY_SCENE)
+	var enemy = scene.instantiate()
+	enemy.position = spawn_position
+	add_child(enemy)
+	if enemy.has_method("configure"):
+		enemy.configure($Object_A, LevelManager.current_level_id)
+	if respawn_on_defeat:
+		_watch_enemy(enemy)

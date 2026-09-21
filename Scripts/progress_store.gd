@@ -16,6 +16,7 @@ func load_progress() -> Dictionary:
 		"completed": config.get_value("campaign", "completed", {}),
 		"best_scores": config.get_value("campaign", "best_scores", {}),
 		"gold": config.get_value("campaign", "gold", 0),
+		"checkpoint": config.get_value("campaign", "checkpoint", {}),
 	})
 
 func complete_level(level_id: int, score: int, gold: int) -> void:
@@ -33,22 +34,39 @@ func complete_level(level_id: int, score: int, gold: int) -> void:
 func reset_progress() -> void:
 	_save_progress(_default_progress())
 
+func save_checkpoint(level_id: int, score: int, gold: int, objective: float, survival: float) -> void:
+	if level_id < MIN_LEVEL or level_id > MAX_LEVEL:
+		push_warning("ProgressStore ignored checkpoint for invalid level: %d" % level_id)
+		return
+	var progress := load_progress()
+	progress.checkpoint = {
+		"level_id": level_id,
+		"score": maxi(score, 0),
+		"gold": maxi(gold, 0),
+		"objective": maxf(objective, 0.0),
+		"survival": maxf(survival, 0.0),
+	}
+	_save_progress(progress)
+
 func _default_progress() -> Dictionary:
 	return {
 		"unlocked_level": MIN_LEVEL,
 		"completed": {},
 		"best_scores": {},
 		"gold": 0,
+		"checkpoint": {},
 	}
 
 func _sanitize_progress(progress: Dictionary) -> Dictionary:
 	var completed = progress.get("completed", {})
 	var best_scores = progress.get("best_scores", {})
+	var checkpoint = progress.get("checkpoint", {})
 	return {
 		"unlocked_level": clampi(int(progress.get("unlocked_level", MIN_LEVEL)), MIN_LEVEL, MAX_LEVEL),
 		"completed": completed if completed is Dictionary else {},
 		"best_scores": best_scores if best_scores is Dictionary else {},
 		"gold": maxi(int(progress.get("gold", 0)), 0),
+		"checkpoint": checkpoint if checkpoint is Dictionary else {},
 	}
 
 func _save_progress(progress: Dictionary) -> void:
@@ -57,6 +75,7 @@ func _save_progress(progress: Dictionary) -> void:
 	config.set_value("campaign", "completed", progress.completed)
 	config.set_value("campaign", "best_scores", progress.best_scores)
 	config.set_value("campaign", "gold", progress.gold)
+	config.set_value("campaign", "checkpoint", progress.checkpoint)
 	var save_result := config.save(storage_path)
 	if save_result != OK:
 		push_warning("ProgressStore could not save campaign progress: %s" % storage_path)

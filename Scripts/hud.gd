@@ -9,6 +9,7 @@ var sound_toggle: Button
 var music_toggle: Button
 var end_overlay: ColorRect
 var end_label: Label
+var pause_overlay: ColorRect
 
 func _ready() -> void:
 	add_to_group("hud")
@@ -46,9 +47,12 @@ func _ready() -> void:
 	_add_action_button("Đóng băng [E]", Vector2(118, 238), func(): _player().activate_freeze())
 	sound_toggle = _add_action_button("SoundOff", Vector2(430, 18), _toggle_sfx)
 	music_toggle = _add_action_button("MusicOn", Vector2(430, 62), _toggle_music)
+	_add_action_button("Hoàn thành màn", Vector2(550, 18), _complete_level_for_demo)
+	_add_action_button("Tạm dừng", Vector2(550, 62), _pause_game)
 	GameState.state_changed.connect(refresh)
 	LevelManager.objective_changed.connect(func(_current: float, _target: float): refresh())
 	_create_end_overlay()
+	_create_pause_overlay()
 	refresh()
 func _add_action_button(text: String, position_value: Vector2, action: Callable) -> Button:
 	var button := Button.new()
@@ -67,6 +71,23 @@ func _toggle_sfx() -> void:
 func _toggle_music() -> void:
 	AudioManager.set_music_enabled(not AudioManager.music_enabled)
 	music_toggle.text = "MusicOff" if AudioManager.music_enabled else "MusicOn"
+func _complete_level_for_demo() -> void:
+	LevelManager.complete_current_level_for_demo()
+func _pause_game() -> void:
+	if GameState.is_game_over or not LevelManager.gameplay_active:
+		return
+	ProgressStore.save_checkpoint(LevelManager.current_level_id, GameState.score, GameState.gold, LevelManager.objective_progress, LevelManager.survival_progress)
+	pause_overlay.visible = true
+	get_tree().paused = true
+
+func _resume_game() -> void:
+	get_tree().paused = false
+	pause_overlay.visible = false
+
+func _go_home_from_pause() -> void:
+	get_tree().paused = false
+	pause_overlay.visible = false
+	SceneRouter.go_home()
 func refresh() -> void:
 	status_label.text = "HP: %d / %d    Armor: %d / %d\nGold: %d    Score: %d" % [GameState.health, GameState.max_health, GameState.armor, GameState.max_armor, GameState.gold, GameState.score]
 	var names := ["Đạn", "Tên lửa", "Bom"]
@@ -109,6 +130,34 @@ func _create_end_overlay() -> void:
 	end_overlay.add_child(end_label)
 	end_overlay.visible = false
 	add_child(end_overlay)
+
+func _create_pause_overlay() -> void:
+	pause_overlay = ColorRect.new()
+	pause_overlay.color = Color(0.01, 0.03, 0.09, 0.88)
+	pause_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pause_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	pause_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	var title := Label.new()
+	title.text = "TẠM DỪNG\nTiến trình hiện tại đã được lưu"
+	title.position = Vector2(350, 230)
+	title.size = Vector2(460, 100)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 28)
+	pause_overlay.add_child(title)
+	var resume := Button.new()
+	resume.text = "TIẾP TỤC"
+	resume.position = Vector2(470, 365)
+	resume.size = Vector2(210, 46)
+	resume.pressed.connect(_resume_game)
+	pause_overlay.add_child(resume)
+	var home := Button.new()
+	home.text = "HOME"
+	home.position = Vector2(470, 425)
+	home.size = Vector2(210, 46)
+	home.pressed.connect(_go_home_from_pause)
+	pause_overlay.add_child(home)
+	pause_overlay.visible = false
+	add_child(pause_overlay)
 
 func show_game_over() -> void:
 	end_label.text = "GAME OVER\nA ĐÃ BỊ PHÁ HỦY"

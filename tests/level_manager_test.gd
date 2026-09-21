@@ -21,9 +21,14 @@ func _init() -> void:
 	var wins: Array[int] = []
 	manager.level_won.connect(func(level_id: int): wins.append(level_id))
 	_expect(manager.start_level(1), "unlocked level 1 must start")
+	_expect(manager.has_method("complete_current_level_for_demo"), "LevelManager must expose demo completion")
+	if manager.has_method("complete_current_level_for_demo"):
+		manager.complete_current_level_for_demo()
+		_expect(wins.size() == 1, "demo completion must win the active level")
+		_expect(manager.start_level(1), "level 1 must be replayable after demo completion")
 	for index in 5:
 		manager.register_enemy_defeat(&"hunter")
-	_expect(wins.size() == 1, "level 1 must emit exactly one win after five defeats")
+	_expect(wins.size() == 2, "level 1 must emit exactly one additional win after five defeats")
 	manager.end_game_over()
 	var objective_before: float = manager.objective_progress
 	manager.register_survival_tick(10.0)
