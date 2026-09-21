@@ -42,10 +42,10 @@ func set_sfx_enabled(enabled: bool) -> void:
 func set_music_enabled(enabled: bool) -> void: music_enabled = enabled
 func play_sfx(effect: StringName) -> void:
 	if not sfx_enabled: return
-	var tones := {&"shoot": 760.0, &"hit": 180.0, &"shield": 520.0, &"freeze": 320.0, &"explosion": 110.0, &"warning": 920.0}
+	var tones := {&"shoot": 760.0, &"hit": 180.0, &"shield": 520.0, &"freeze": 320.0, &"explosion": 110.0, &"warning": 920.0, &"win": 660.0}
 	sfx_frequency = tones.get(effect, 440.0)
 	is_explosion = effect == &"explosion" or effect == &"hit"
-	sfx_duration = 0.58 if is_explosion else 0.12
+	sfx_duration = 0.58 if is_explosion else (0.34 if effect == &"win" else 0.12)
 	sfx_time = sfx_duration
 func play_danger_warning(repetitions: int) -> void:
 	if not sfx_enabled: return
