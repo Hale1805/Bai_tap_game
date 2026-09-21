@@ -4,6 +4,7 @@ var status_label: Label
 var weapon_label: Label
 var debuff_label: Label
 var buff_label: Label
+var objective_label: Label
 var sound_toggle: Button
 var music_toggle: Button
 var end_overlay: ColorRect
@@ -33,6 +34,11 @@ func _ready() -> void:
 	buff_label.add_theme_color_override("font_color", Color(0.25, 0.95, 0.65))
 	buff_label.add_theme_font_size_override("font_size", 16)
 	add_child(buff_label)
+	objective_label = Label.new()
+	objective_label.position = Vector2(570, 20)
+	objective_label.add_theme_font_size_override("font_size", 18)
+	objective_label.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0))
+	add_child(objective_label)
 	_add_action_button("Đạn [1]", Vector2(18, 192), func(): _player().try_attack(GameState.AttackType.BULLET))
 	_add_action_button("Tên lửa [2]", Vector2(118, 192), func(): _player().try_attack(GameState.AttackType.MISSILE))
 	_add_action_button("Bom [3]", Vector2(238, 192), func(): _player().try_attack(GameState.AttackType.BOMB))
@@ -41,7 +47,7 @@ func _ready() -> void:
 	sound_toggle = _add_action_button("SoundOff", Vector2(430, 18), _toggle_sfx)
 	music_toggle = _add_action_button("MusicOn", Vector2(430, 62), _toggle_music)
 	GameState.state_changed.connect(refresh)
-	GameState.game_over.connect(show_game_over)
+	LevelManager.objective_changed.connect(func(_current: float, _target: float): refresh())
 	_create_end_overlay()
 	refresh()
 func _add_action_button(text: String, position_value: Vector2, action: Callable) -> Button:
@@ -70,7 +76,7 @@ func refresh() -> void:
 	else:
 		var active := []
 		for effect_name in GameState.debuffs:
-			active.append("%s %.1fs" % [name, GameState.debuffs[effect_name]])
+			active.append("%s %.1fs" % [effect_name, GameState.debuffs[effect_name]])
 		debuff_label.text = "DEBUFF: " + " | ".join(active)
 	if GameState.buffs.is_empty():
 		buff_label.text = ""
@@ -79,6 +85,14 @@ func refresh() -> void:
 		for effect_name in GameState.buffs:
 			active_buffs.append("%s %.1fs" % [effect_name, GameState.buffs[effect_name]])
 		buff_label.text = "BUFF: " + " | ".join(active_buffs)
+	var definition := LevelManager.get_current_definition()
+	if definition.is_empty():
+		objective_label.text = ""
+	else:
+		var objective := "Tiêu diệt %d / %d" % [int(LevelManager.objective_progress), int(definition.target)]
+		if int(definition.id) == 2:
+			objective = "Sống sót %d / %ds | Hạ %d / %d" % [int(LevelManager.survival_progress), int(definition.target), int(LevelManager.objective_progress), int(definition.defeat_target)]
+		objective_label.text = "%s\n%s" % [definition.title, objective]
 
 func _create_end_overlay() -> void:
 	end_overlay = ColorRect.new()

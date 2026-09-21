@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="BaiTap"
-run/main_scene="uid://d6fuc58d0yjn"
+run/main_scene="res://home.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/icon.svg"
 
@@ -19,11 +19,18 @@ config/icon="res://assets/icon.svg"
 
 GameState="*res://Scripts/game_state.gd"
 AudioManager="*res://Scripts/audio_manager.gd"
+ProgressStore="*res://Scripts/progress_store.gd"
+LevelManager="*res://Scripts/level_manager.gd"
+SceneRouter="*res://Scripts/scene_router.gd"
 
 [display]
 
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="BaiTap"
 
 [input]
 

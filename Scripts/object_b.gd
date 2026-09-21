@@ -32,6 +32,8 @@ func take_damage(amount: float) -> bool:
 	health -= maxf(amount, 0.0)
 	if health <= 0.0:
 		AudioManager.play_sfx(&"explosion")
+		if LevelManager.gameplay_active:
+			LevelManager.register_enemy_defeat(&"hunter")
 		queue_free()
 		return true
 	return false
