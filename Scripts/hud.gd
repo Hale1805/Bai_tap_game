@@ -36,7 +36,7 @@ func _ready() -> void:
 	buff_label.add_theme_font_size_override("font_size", 16)
 	add_child(buff_label)
 	objective_label = Label.new()
-	objective_label.position = Vector2(570, 20)
+	objective_label.position = Vector2(870, 20)
 	objective_label.add_theme_font_size_override("font_size", 18)
 	objective_label.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0))
 	add_child(objective_label)

@@ -17,7 +17,9 @@ func _ready():
 	LevelManager.level_won.connect(_on_level_won)
 	LevelManager.level_lost.connect(_on_level_lost)
 	LevelManager.game_completed.connect(_on_game_completed)
-	GameState.game_over.connect(LevelManager.end_game_over)
+	if not GameState.game_over.is_connected(LevelManager.end_game_over):
+		GameState.game_over.connect(LevelManager.end_game_over)
+	#GameState.game_over.connect(LevelManager.end_game_over)
 	_configure_level(LevelManager.get_current_definition())
 	# Đảm bảo ảnh 2 hoàn toàn trong suốt lúc game mới bắt đầu
 	layer2.modulate.a = 0.0
