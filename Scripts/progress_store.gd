@@ -31,8 +31,20 @@ func complete_level(level_id: int, score: int, gold: int) -> void:
 	progress.unlocked_level = mini(MAX_LEVEL, maxi(int(progress.unlocked_level), level_id + 1))
 	_save_progress(progress)
 
-func reset_progress() -> void:
-	_save_progress(_default_progress())
+func record_score(level_id: int, score: int) -> void:
+	if level_id < MIN_LEVEL or level_id > MAX_LEVEL:
+		push_warning("ProgressStore ignored score for invalid level id: %d" % level_id)
+		return
+	var progress := load_progress()
+	var level_key := str(level_id)
+	progress.best_scores[level_key] = maxi(int(progress.best_scores.get(level_key, 0)), maxi(score, 0))
+	_save_progress(progress)
+
+func reset_progress(keep_best_scores: bool = false) -> void:
+	var reset_data := _default_progress()
+	if keep_best_scores:
+		reset_data.best_scores = load_progress().best_scores.duplicate(true)
+	_save_progress(reset_data)
 
 func save_checkpoint(level_id: int, score: int, gold: int, objective: float, survival: float) -> void:
 	if level_id < MIN_LEVEL or level_id > MAX_LEVEL:

@@ -11,6 +11,7 @@ const LEVELS := {
 	2: {"id": 2, "title": "Meteor Storm", "objective_kind": &"survive", "target": 45.0, "defeat_target": 8.0, "background_mode": 1, "max_active_npcs": 7, "allowed_npcs": [&"hunter", &"scout"]},
 	3: {"id": 3, "title": "Alien Core", "objective_kind": &"core", "target": 1.0, "background_mode": 2, "max_active_npcs": 4, "escort_count": 3, "allowed_npcs": [&"hunter", &"scout", &"guardian"]},
 }
+const ENEMY_SCORE := {&"hunter": 100, &"scout": 150, &"guardian": 1000}
 
 var progress_store: Node
 var game_state: Node
@@ -46,6 +47,8 @@ func start_level(level_id: int) -> bool:
 func register_enemy_defeat(npc_type: StringName) -> void:
 	if not gameplay_active or terminal_emitted:
 		return
+	if game_state != null:
+		game_state.add_reward(0, int(ENEMY_SCORE.get(npc_type, 0)))
 	var definition: Dictionary = LEVELS.get(current_level_id, {})
 	if definition.is_empty():
 		return
@@ -77,6 +80,8 @@ func end_game_over() -> void:
 		return
 	gameplay_active = false
 	terminal_emitted = true
+	if progress_store != null and game_state != null:
+		progress_store.record_score(current_level_id, int(game_state.score))
 	level_lost.emit(current_level_id)
 
 func stop_gameplay() -> void:
@@ -109,7 +114,7 @@ func _win_level() -> void:
 	var gold := int(game_state.gold) if game_state != null else 0
 	progress_store.complete_level(current_level_id, score, gold)
 	if current_level_id == 3:
-		progress_store.reset_progress()
+		progress_store.reset_progress(true)
 		game_completed.emit()
 	else:
 		level_won.emit(current_level_id)

@@ -1,11 +1,13 @@
 extends Area2D
 
-@export var speed := 280.0
+@export var speed := 180.0
 @export var max_health := 70.0
 var health := max_health
 var target: Node2D
 var frozen_remaining := 0.0
 var defeated := false
+var dash_cooldown := 1.5
+var dash_remaining := 0.0
 
 func configure(target_node: Node2D, _level_id: int) -> void:
 	target = target_node
@@ -23,7 +25,20 @@ func _process(delta: float) -> void:
 		return
 	if target != null:
 		var direction := global_position.direction_to(target.global_position)
-		global_position += direction * speed * delta
+		var distance := global_position.distance_to(target.global_position)
+		dash_cooldown = maxf(dash_cooldown - delta, 0.0)
+		dash_remaining = maxf(dash_remaining - delta, 0.0)
+		if distance > 105.0:
+			global_position += direction * speed * delta
+		elif dash_remaining > 0.0:
+			global_position += direction * speed * 1.7 * delta
+		elif dash_cooldown <= 0.0:
+			dash_remaining = 0.22
+			dash_cooldown = 2.8
+		else:
+			var tangent := direction.rotated(PI * 0.5)
+			var retreat := -direction * 0.7 if distance < 85.0 else Vector2.ZERO
+			global_position += (tangent + retreat).normalized() * speed * delta
 		rotation = direction.angle()
 
 func take_damage(amount: float) -> bool:
@@ -44,3 +59,10 @@ func take_damage(amount: float) -> bool:
 
 func freeze(duration: float) -> void:
 	frozen_remaining = maxf(frozen_remaining, duration)
+
+func collision_damage() -> float:
+	return 22.0 if dash_remaining > 0.0 else 10.0
+
+func push_from(source_position: Vector2) -> void:
+	var away := source_position.direction_to(global_position)
+	global_position += (away if away != Vector2.ZERO else Vector2.RIGHT) * 80.0

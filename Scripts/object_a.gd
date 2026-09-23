@@ -87,6 +87,15 @@ func apply_speed_modifier(multiplier: float, duration: float) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemy") and contact_cooldown <= 0.0:
-		GameState.apply_damage(15.0)
+		var away := area.global_position.direction_to(global_position)
+		if away == Vector2.ZERO:
+			away = Vector2.LEFT
+		var incoming_damage: float = float(area.collision_damage()) if area.has_method("collision_damage") else 15.0
+		GameState.apply_damage(incoming_damage)
+		if area.has_method("take_damage"):
+			area.take_damage(10.0)
+		if is_instance_valid(area) and area.has_method("push_from"):
+			area.push_from(global_position)
+		global_position += away * 45.0
 		contact_cooldown = 0.8
 		AudioManager.play_sfx(&"hit")

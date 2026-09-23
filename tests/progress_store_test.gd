@@ -29,6 +29,10 @@ func _init() -> void:
 	store.complete_level(1, 20, 0)
 	var lower_score: Dictionary = store.load_progress()
 	_expect(lower_score.best_scores.get("1", 0) == 50, "lower score must not replace the best score")
+	store.record_score(2, 175)
+	var game_over_score: Dictionary = store.load_progress()
+	_expect(game_over_score.best_scores.get("2", 0) == 175, "game-over score must persist as the level high score")
+	_expect(not game_over_score.completed.get("2", false) and game_over_score.unlocked_level == 2, "saving a game-over score must not complete or unlock a level")
 	_expect(store.has_method("save_checkpoint"), "ProgressStore must expose checkpoint saving for Pause")
 	if store.has_method("save_checkpoint"):
 		store.save_checkpoint(1, 120, 7, 3.0, 0.0)

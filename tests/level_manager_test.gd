@@ -2,6 +2,7 @@ extends SceneTree
 
 const LEVEL_MANAGER_PATH := "res://Scripts/level_manager.gd"
 const ProgressStoreScript = preload("res://Scripts/progress_store.gd")
+const GameStateScript = preload("res://Scripts/game_state.gd")
 
 var failures := 0
 
@@ -13,6 +14,9 @@ func _init() -> void:
 		return
 	var manager = manager_script.new()
 	root.add_child(manager)
+	var game_state = GameStateScript.new()
+	game_state.reset()
+	manager.game_state = game_state
 	var store = ProgressStoreScript.new()
 	store.storage_path = "res://tests/level_manager_progress_test.cfg"
 	store.reset_progress()
@@ -29,7 +33,11 @@ func _init() -> void:
 	for index in 5:
 		manager.register_enemy_defeat(&"hunter")
 	_expect(wins.size() == 2, "level 1 must emit exactly one additional win after five defeats")
+	_expect(game_state.score == 500, "destroying five Hunters must award 500 score without awarding Gold")
+	_expect(manager.start_level(1), "level 1 must be replayable before testing a game-over score")
+	game_state.add_reward(0, 700)
 	manager.end_game_over()
+	_expect(store.load_progress().best_scores.get("1", 0) == 700, "game over must persist the current score as a high score")
 	var objective_before: float = manager.objective_progress
 	manager.register_survival_tick(10.0)
 	_expect(manager.objective_progress == objective_before, "game over must stop objective progression")
